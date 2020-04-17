@@ -1,0 +1,86 @@
+<?php
+
+if(isset($_POST['add']))
+{
+    $slideName = mysqli_real_escape_string($con, $_POST['slideName']);
+    $slideLink = mysqli_real_escape_string($con, $_POST['slideLink']);
+    
+    $image = $_FILES['image']['name'];
+    $tmp_image = $_FILES['image']['tmp_name'];
+    $imageSize = $_FILES['image']['size'];
+    
+    if(strlen($slideName) <5)
+    {
+        $result = '<div class="alert alert-danger alert-dismisible">نام سلاید کوتاه است</div>';
+    }
+    else if(filter_var($slideLink, FILTER_SANITIZE_URL))
+    {
+        $result = '<div class="alert alert-danger alert-dismisible">لینک که وارد نموده اید اشتباه است</div>';
+    }
+    else if($image == "")
+    {
+        $result = '<div class="alert alert-danger alert-dismisible">لطفا تصویر سلاید را انتخاب نمائید</div>';
+    }
+    else
+    {
+    }
+    
+    $insertQuery = "INSERT INTO slider(slide_name, slide_link, slide_image) VALUES ('$slideName', '$slideLink', '$image')";
+    if(mysqli_query($con, $insertQuery))
+    {
+    if(move_uploaded_file($tmp_image, "image/$image"))
+    {
+    if($error == false)
+    {
+        $result = '<div class="alert alert-success alert-dismisible">تغیرات موفقانه انجام شد</div>';
+    }
+    else 
+    {
+        $result = '<div class="alert alert-danger alert-dismisible">چیزی اشتباه شده است</div>';
+    }
+    }
+
+    }
+}
+?>
+
+    <div class="col-sm-8">
+    <table class="table table-hover">
+    <thead>
+    <tr>
+    <th>ID</th>    
+    <th scope="col">نام سلاید</th>    
+    <th scope="col">لینک سلاید</th>    
+    <th scope="col">تصویر سلاید</th>    
+    <th scope="col">نمایش</th>    
+    <th scope="col">ویرایش</th>    
+    <th scope="col">حذف</th>  
+    </tr>    
+    </thead> 
+    <tbody>
+    <tr>
+    
+    <?php
+    $selectQuery = "SELECT * FROM slider";
+        if($result = mysqli_query($con, $selectQuery))
+        {
+            if(mysqli_num_rows($result) > 0)
+            {
+                while($row = mysqli_fetch_array($result, MYSQL_ASSOC))
+                {
+                    echo "<tr>";
+                    echo "<td>" . $row['id'] . "</td>";
+                    echo "<td>" . $row['slide_name'] . "</td>";
+                    echo "<td>" . $row['slide_link'] . "</td>";   
+                    echo '<td><img src="data:image/$image/JPG;base64,'.base64_encode($row['slide_image'] ).'" height="60" width="60" class="img-thumbnail" /></td>';
+                    echo '<td scope="col"><a href="#"><i class="fas fa-eye" style="color: #3B8D64;">';
+                    echo '<td scope="col"><a href="#"><i class="fas fa-pen" style="color: #ccc;">';
+                    echo '<td scope="col"><a href="#"><i class="fas fa-trash" style="color: red;">';
+                }
+            }
+        }
+    ?>    
+    </tr>    
+    </tbody>
+    </table>   
+    </div>
